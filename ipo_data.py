@@ -5,6 +5,8 @@ import json
 import os
 import re
 import tempfile
+import sqlite3
+from contextlib import closing
 import urllib.request
 from datetime import date, datetime, timezone
 from html.parser import HTMLParser
@@ -98,6 +100,30 @@ def refresh(path=DATA_PATH, year=None):
     snapshot = merge_snapshot(previous, fresh, source)
     atomic_save(snapshot, path)
     return snapshot
+
+MANUAL_PATH = DATA_PATH.with_name('manual_ipos.sqlite3')
+
+def ensure_manual_table(db):
+    db.execute(
+        'CREATE TABLE IF NOT EXISTS manual_listings '
+        '(date TEXT, ticker TEXT, payload TEXT, PRIMARY KEY(date, ticker))'
+    )
+
+def read_manual_listings():
+    if not MANUAL_PATH.exists():
+        return []
+    with closing(sqlite3.connect(MANUAL_PATH)) as db:
+        ensure_manual_table(db)
+        records = db.execute('SELECT payload FROM manual_listings').fetchall()
+    return [json.loads(record[0]) for record in records]
+
+def save_manual_listing(listing):
+    with closing(sqlite3.connect(MANUAL_PATH)) as db, db:
+        ensure_manual_table(db)
+        result = db.execute('INSERT OR IGNORE INTO manual_listings VALUES (?, ?, ?)',
+                            (listing['date'], listing['ticker'], json.dumps(listing)))
+        if not result.rowcount:
+            raise ValueError('This ticker and listing date are already in the directory.')
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description=__doc__)

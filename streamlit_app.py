@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 from urllib.parse import urlencode, quote
+import sqlite3
 import streamlit as st
-from ipo_data import read_snapshot, refresh
+from ipo_data import read_snapshot, refresh, validate_row, read_manual_listings, save_manual_listing
 
 st.set_page_config(page_title='IPO Watch', page_icon='📈', layout='wide')
 st.markdown('''<style>
@@ -26,11 +27,41 @@ with right:
 
 with st.spinner('Checking IPO listings…'):
     snapshot, warning = load_snapshot()
-rows = snapshot['rows']
+manual = read_manual_listings()
+rows = list({(r['date'], r['ticker']): r for r in manual + snapshot['rows']}.values())
+
 if warning: st.warning(warning)
 updated = datetime.fromisoformat(snapshot['updated_at']).strftime('%b %d, %Y · %H:%M UTC')
 st.caption(f"{len(rows)} saved listings · Last successful update: {updated} · Source coverage and delays may vary")
 st.divider()
+
+with st.expander('＋ Add IPO'):
+    with st.form('add_ipo'):
+        ticker = st.text_input('Stock ticker', max_chars=20)
+        company = st.text_input('Company name', max_chars=300)
+        trading_date = st.date_input('First trading date', max_value=datetime.now(timezone.utc).date())
+        offer = st.text_input('Offer price in USD (optional)')
+        submitted = st.form_submit_button('Save IPO')
+    if submitted:
+        try:
+            listing = validate_row({
+                'ticker': ticker.strip().upper(), 'name': company,
+                'date': trading_date.isoformat(),
+                'offer': float(offer) if offer.strip() else None,
+            })
+            key = listing['date'] + ':' + listing['ticker']
+            if any(row['date'] + ':' + row['ticker'] == key for row in rows):
+                st.error('This ticker and listing date are already in the directory.')
+            else:
+                save_manual_listing(listing)
+                rows.append(listing)
+                st.session_state.update(search='', year=listing['date'][:4],
+                                        month='All months', exclude_spacs=False, company=key)
+                st.success(f"{listing['ticker']} was added to the directory.")
+        except ValueError as error:
+            st.error(str(error))
+        except (OSError, sqlite3.Error):
+            st.error('The listing could not be saved.')
 
 filter_col, chart_col = st.columns([1, 2.1], gap='large')
 with filter_col:
