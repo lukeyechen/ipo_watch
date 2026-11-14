@@ -1,6 +1,27 @@
 {
   "rows": [
     {
+      "date": "2026-11-13",
+      "ticker": "WWB",
+      "name": "Windward Bio Group AG",
+      "offer": 17.0,
+      "kind": "Listing"
+    },
+    {
+      "date": "2026-11-13",
+      "ticker": "VVVV",
+      "name": "vVARDIS Holding AG",
+      "offer": 18.0,
+      "kind": "Listing"
+    },
+    {
+      "date": "2026-11-13",
+      "ticker": "MDRN",
+      "name": "Modern Mining Technology Corp.",
+      "offer": 4.25,
+      "kind": "Listing"
+    },
+    {
       "date": "2026-11-02",
       "ticker": "NARA",
       "name": "Narragansett Bancorp, Inc.",
@@ -1856,6 +1877,6 @@
       "kind": "SPAC"
     }
   ],
-  "updated_at": "2026-11-13T03:31:51.127916+00:00",
+  "updated_at": "2026-11-14T03:29:22.307603+00:00",
   "source": "https://stockanalysis.com/ipos/2026/"
 }
