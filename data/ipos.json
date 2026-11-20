@@ -1,6 +1,13 @@
 {
   "rows": [
     {
+      "date": "2026-11-19",
+      "ticker": "ANT",
+      "name": "Anthropic, PBC",
+      "offer": 83.0,
+      "kind": "Listing"
+    },
+    {
       "date": "2026-11-13",
       "ticker": "WWB",
       "name": "Windward Bio Group AG",
@@ -1877,6 +1884,6 @@
       "kind": "SPAC"
     }
   ],
-  "updated_at": "2026-11-19T04:26:02.261355+00:00",
+  "updated_at": "2026-11-20T04:12:21.613121+00:00",
   "source": "https://stockanalysis.com/ipos/2026/"
 }
